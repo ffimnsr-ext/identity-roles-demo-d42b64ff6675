@@ -35,6 +35,27 @@ namespace Is4RoleDemo
                     var context = scope.ServiceProvider.GetService<ApplicationDbContext>();
                     context.Database.Migrate();
 
+                    var roleMgr = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+                    var member = roleMgr.FindByNameAsync("member").Result;
+                    if (member == null)
+                    {
+                        member = new IdentityRole
+                        {
+                            Name = "member"
+                        };
+                        _ = roleMgr.CreateAsync(member).Result;
+                    }
+
+                    var admin = roleMgr.FindByNameAsync("admin").Result;
+                    if (admin == null)
+                    {
+                        admin = new IdentityRole
+                        {
+                            Name = "admin"
+                        };
+                        _ = roleMgr.CreateAsync(admin).Result;
+                    }
+
                     var userMgr = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
                     var alice = userMgr.FindByNameAsync("alice").Result;
                     if (alice == null)
@@ -61,6 +82,12 @@ namespace Is4RoleDemo
                         {
                             throw new Exception(result.Errors.First().Description);
                         }
+
+                        if (!userMgr.IsInRoleAsync(alice, member.Name).Result)
+                        {
+                            _ = userMgr.AddToRoleAsync(alice, member.Name).Result;
+                        }
+
                         Log.Debug("alice created");
                     }
                     else
@@ -94,6 +121,12 @@ namespace Is4RoleDemo
                         {
                             throw new Exception(result.Errors.First().Description);
                         }
+
+                        if (!userMgr.IsInRoleAsync(bob, admin.Name).Result)
+                        {
+                            _ = userMgr.AddToRoleAsync(bob, admin.Name).Result;
+                        }
+
                         Log.Debug("bob created");
                     }
                     else
