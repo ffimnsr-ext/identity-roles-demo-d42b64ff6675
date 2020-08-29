@@ -1,0 +1,6 @@
+# Install IS4 templatates
+dotnet new -i IdentityServer4.Templates
+
+# Create new project from the installed templates
+dotnet new is4aspid -n Is4RoleDemo
+
